@@ -1,0 +1,56 @@
+body {
+    text-align: center;
+    background-color: black;
+    color: white;
+    font-family: 'Press Start 2P', cursive; /* Retro arcade font */
+}
+
+#gameContainer {
+    position: relative;
+    width: 400px;
+    height: 600px;
+    background-color: black;
+    border: 2px solid white;
+    margin: auto;
+    overflow: hidden;
+}
+
+.player {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    bottom: 10px;
+    left: 180px;
+    background-color: blue;
+}
+
+.bullet {
+    position: absolute;
+    width: 5px;
+    height: 15px;
+    background-color: yellow;
+}
+
+.purchaseButton {
+    position: absolute;
+    color: white;
+    background-color: darkblue;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+}
+#buy20 { top: 50px; left: 100px; }
+#buy50 { top: 100px; left: 100px; }
+#buy150 { top: 150px; left: 100px; }
+
+.enemy {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-color: red;
+}
+
+h1, p {
+    text-shadow: 2px 2px 5px cyan;
+}
