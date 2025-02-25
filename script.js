@@ -19,15 +19,20 @@ document.addEventListener("DOMContentLoaded", () => {
     let gameOver = false;
     let totalBullets = 20;
     let gamepadIndex = null;
+    let enemyFailCount = 0; // Track how many times any enemy has reached the bottom
 
     function movePlayer(direction) {
         playerX += direction * 10;
-        playerX = Math.max(0, Math.min(GAME_WIDTH - PLAYER_WIDTH, playerX));
+        playerX = Math.max(5, Math.min(GAME_WIDTH - PLAYER_WIDTH - 5, playerX));
         player.style.left = `${playerX}px`;
     }
 
     function shootBullet() {
-        if (gameOver || totalBullets <= 0) return;
+        if (gameOver || totalBullets <= 0 || !canShoot) return;
+
+        canShoot = false;
+        setTimeout(() => canShoot = true, 300); // 300ms cooldown
+
         const bullet = document.createElement("div");
         bullet.classList.add("bullet");
         bullet.style.left = `${playerX + PLAYER_WIDTH / 2 - 2.5}px`;
@@ -35,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
         gameContainer.appendChild(bullet);
         bullets.push(bullet);
         totalBullets--;
+        document.getElementById("bulletsLeft").innerText = `Bullets Left: ${totalBullets}`;
     }
 
     function spawnEnemy() {
@@ -44,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
         enemy.style.left = `${Math.random() * (GAME_WIDTH - ENEMY_WIDTH)}px`;
         enemy.style.top = "0px";
         gameContainer.appendChild(enemy);
-        enemies.push(enemy);
+        enemies.push({ element: enemy, failCount: 0 }); // Initialize fail count for each enemy
     }
 
     function updateGame() {
@@ -61,23 +67,28 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         enemies.forEach((enemy, index) => {
-            let enemyY = parseInt(enemy.style.top) + ENEMY_SPEED;
+            let enemyY = parseInt(enemy.element.style.top) + ENEMY_SPEED;
             if (enemyY > GAME_HEIGHT) {
-                // Player loses 10 points instead of game over
+                enemy.failCount++; // Increment fail count when enemy reaches the bottom
+                if (enemy.failCount >= 3) {
+                    gameOver = true;
+                    alert("Game Over! An enemy reached the bottom 3 times.");
+                    return;
+                }
+                enemy.element.remove();
+                enemies.splice(index, 1);
                 score -= 10;
                 scoreDisplay.innerText = score;
-                enemy.remove();
-                enemies.splice(index, 1);
             } else {
-                enemy.style.top = `${enemyY}px`;
+                enemy.element.style.top = `${enemyY}px`;
             }
         });
 
         bullets.forEach((bullet, bulletIndex) => {
             enemies.forEach((enemy, enemyIndex) => {
-                if (detectCollision(bullet, enemy)) {
+                if (detectCollision(bullet, enemy.element)) {
                     bullet.remove();
-                    enemy.remove();
+                    enemy.element.remove();
                     bullets.splice(bulletIndex, 1);
                     enemies.splice(enemyIndex, 1);
                     score += 10;
@@ -144,6 +155,8 @@ document.addEventListener("DOMContentLoaded", () => {
         updatePurchaseButtons();
     }
 
+    let canShoot = true;
+
     window.addEventListener("keydown", handleKeyboardInput);
 
     window.addEventListener("gamepadconnected", (event) => {
@@ -159,45 +172,3 @@ document.addEventListener("DOMContentLoaded", () => {
     updateGame();
     updateGamepadControls();
 });
-
-// Track the Konami code sequence
-const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-let konamiIndex = 0;
-let invincible = false; // Flag to track invincibility
-
-// Function to handle keypress events
-document.addEventListener('keydown', function(event) {
-    if (event.key === konamiCode[konamiIndex]) {
-        konamiIndex++;
-        if (konamiIndex === konamiCode.length) {
-            // Konami Code entered successfully, activate invincibility
-            invincible = true;
-            alert('Konami Code activated! You are now invincible!');
-            konamiIndex = 0; // Reset the index for future codes
-        }
-    } else {
-        // Reset the index if the wrong key is pressed
-        konamiIndex = 0;
-    }
-});
-
-// Example of a simple game loop or collision check where invincibility can be applied
-function checkCollision(player, enemy) {
-    if (invincible) {
-        // If invincible, do nothing when collision happens
-        return false; // No collision damage
-    }
-    // Normal collision logic (e.g., end game if player collides with enemy)
-    if (player.collidesWith(enemy)) {
-        endGame();
-        return true;
-    }
-    return false;
-}
-
-// Example end game function
-function endGame() {
-    alert('Game Over!');
-    // Reset the game or stop it entirely
-    // You can also apply any other game-over behavior here
-}
