@@ -2,14 +2,15 @@ body {
     text-align: center;
     background-color: black;
     color: white;
-    font-family: 'Press Start 2P', cursive;
+    font-family: 'Press Start 2P', "Press Start 2P";
+    background-image: "nightsky.jpg";
 }
 
 #gameContainer {
     position: relative;
     width: 400px;
     height: 600px;
-    background-color: black;
+    background-image: url("nightsky.jpg");
     border: 2px solid white;
     margin: auto;
     overflow: hidden;
@@ -28,8 +29,8 @@ body {
 
 .enemy {
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 20px;
+    height: 20px;
     background-color: red;
 }
 

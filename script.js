@@ -19,10 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
     let bullets = [];
     let gamepadIndex = null;
     let canShoot = true;
+    let spawnInterval = 3000;  // Initial spawn interval in ms (3 seconds)
+    let spawnDelayIncrement = 10000;  // Add 2 seconds to spawn delay after each batch
 
     // Adjust player movement speed (slower horizontal movement)
     function movePlayer(direction) {
-        playerX += direction * 5;  // Reduced movement per step
+        playerX += direction * 15;  // Reduced movement per step
         playerX = Math.max(5, Math.min(GAME_WIDTH - PLAYER_WIDTH - 5, playerX));
         player.style.left = `${playerX}px`;
     }
@@ -31,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (gameOver || !canShoot) return;
 
         canShoot = false;
-        setTimeout(() => (canShoot = true), 300);
+        setTimeout(() => (canShoot = true), 100); // Decreased cooldown to 150ms
 
         const bullet = document.createElement("div");
         bullet.classList.add("bullet");
@@ -99,7 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
             let enemyY = parseInt(enemy.style.top) + ENEMY_SPEED; // Slower enemy speed
             if (enemyY > GAME_HEIGHT) {
                 gameOver = true;
-                gameOverDisplay.innerText = "Yes";
+                gameOverDisplay.innerText = `Game Over! Final Score: ${score}\nPress "R" to Restart`;
+                playRandomAudio();  // Play random audio when game ends
                 alert("Game Over! Your score is: " + score);
             } else {
                 enemy.style.top = `${enemyY}px`;
@@ -132,7 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function checkGameOver() {
         if (enemies.length === 0) {
             gameOver = true;
-            gameOverDisplay.innerText = "Yes";
+            gameOverDisplay.innerText = `You Win! Final Score: ${score}\nPress "R" to Restart`;
+            playRandomAudio();  // Play random audio when the player wins
             alert("You Win! Final Score: " + score);
         }
     }
@@ -155,18 +159,55 @@ document.addEventListener("DOMContentLoaded", () => {
     function handleKeyboardInput(e) {
         if (e.key === "ArrowLeft" || e.key === "a") movePlayer(-1);
         if (e.key === "ArrowRight" || e.key === "d") movePlayer(1);
-        if (e.key === " ") shootBullet();
+        if (e.key === " " && !gameOver) shootBullet();
+        if (e.key === "r" || e.key === "R") restartGame();
     }
 
+    // Function to play a random sound from the "audio" directory
     function playRandomAudio() {
         const audioFiles = [
             "audio/pew-pew-lame-sound-effect.mp3",
-            "audio/explosion-sound-effect.mp3"
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/vine-boom-sound-effect_KT89XIq.mp3",
+            "audio/rizz-sound-effect.mp3",
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/pew-pew-lame-sound-effect.mp3",
         ];
 
         const randomIndex = Math.floor(Math.random() * audioFiles.length);
         const audio = new Audio(audioFiles[randomIndex]);
         audio.play();
+    }
+
+    function restartGame() {
+        if (!gameOver) return;
+
+        // Reset the game state
+        gameOver = false;
+        score = 0;
+        scoreDisplay.innerText = score;
+        gameOverDisplay.innerText = "";
+
+        // Clear enemies and bullets
+        enemies.forEach(enemy => enemy.remove());
+        bullets.forEach(bullet => bullet.remove());
+        enemies = [];
+        bullets = [];
+
+        // Spawn new enemies
+        spawnEnemies();
+
+        // Restart the game loop
+        updateGame();
     }
 
     window.addEventListener("keydown", handleKeyboardInput);
@@ -175,8 +216,17 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Gamepad connected");
     });
 
-    spawnEnemies();
-    setInterval(() => spawnEnemies(), 7000); // Slower enemy respawn rate
+    spawnEnemies(); // Initial enemy spawn
+    function spawnEnemiesWithIncreasingDelay() {
+        if (gameOver) return;
+        spawnEnemies(); // Spawn enemies
+        // Increase spawn interval by 2000 ms (2 seconds)
+        spawnInterval += 2000; 
+        // Schedule the next enemy wave
+        setTimeout(spawnEnemiesWithIncreasingDelay, spawnInterval);
+    }
+    // Start the enemy spawning cycle
+    spawnEnemiesWithIncreasingDelay();    
     updateGame();
     updateGamepadControls();
 });
