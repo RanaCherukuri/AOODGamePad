@@ -2,36 +2,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const gameContainer = document.getElementById("gameContainer");
     const player = document.getElementById("player");
     const scoreDisplay = document.getElementById("score");
-    const buy20Button = document.getElementById("buy20");
-    const buy50Button = document.getElementById("buy50");
-    const buy150Button = document.getElementById("buy150");
+    const gameOverDisplay = document.getElementById("gameOver");
 
     const GAME_WIDTH = 400;
     const GAME_HEIGHT = 600;
     const PLAYER_WIDTH = 40;
     const ENEMY_WIDTH = 40;
-    const BULLET_SPEED = 5;
-    const ENEMY_SPEED = 2;
+    const ENEMY_SPEED = 1;  // Slower enemy movement speed
+    const BULLET_SPEED = 3; // Slower bullet speed
+    const ENEMY_ROWS = 3;
+    const ENEMY_COLS = 5;
     let playerX = 180;
-    let bullets = [];
-    let enemies = [];
     let score = 0;
     let gameOver = false;
-    let totalBullets = 20;
+    let enemies = [];
+    let bullets = [];
     let gamepadIndex = null;
-    let enemyFailCount = 0; // Track how many times any enemy has reached the bottom
+    let canShoot = true;
 
+    // Adjust player movement speed (slower horizontal movement)
     function movePlayer(direction) {
-        playerX += direction * 10;
+        playerX += direction * 5;  // Reduced movement per step
         playerX = Math.max(5, Math.min(GAME_WIDTH - PLAYER_WIDTH - 5, playerX));
         player.style.left = `${playerX}px`;
     }
 
     function shootBullet() {
-        if (gameOver || totalBullets <= 0 || !canShoot) return;
+        if (gameOver || !canShoot) return;
 
         canShoot = false;
-        setTimeout(() => canShoot = true, 300); // 300ms cooldown
+        setTimeout(() => (canShoot = true), 300);
 
         const bullet = document.createElement("div");
         bullet.classList.add("bullet");
@@ -39,18 +39,47 @@ document.addEventListener("DOMContentLoaded", () => {
         bullet.style.bottom = "50px";
         gameContainer.appendChild(bullet);
         bullets.push(bullet);
-        totalBullets--;
-        document.getElementById("bulletsLeft").innerText = `Bullets Left: ${totalBullets}`;
+        playRandomAudio();
     }
 
-    function spawnEnemy() {
+    function spawnEnemies() {
         if (gameOver) return;
-        const enemy = document.createElement("div");
-        enemy.classList.add("enemy");
-        enemy.style.left = `${Math.random() * (GAME_WIDTH - ENEMY_WIDTH)}px`;
-        enemy.style.top = "0px";
-        gameContainer.appendChild(enemy);
-        enemies.push({ element: enemy, failCount: 0 }); // Initialize fail count for each enemy
+
+        // Randomly select the layout type
+        const layoutTypes = ['rectangle', 'triangle', 'line'];
+        const randomLayout = layoutTypes[Math.floor(Math.random() * layoutTypes.length)];
+
+        const startX = Math.floor(GAME_WIDTH / 2 - (ENEMY_WIDTH * ENEMY_COLS) / 2);
+        const startY = 50; // Start just below the player area
+
+        for (let row = 0; row < ENEMY_ROWS; row++) {
+            for (let col = 0; col < ENEMY_COLS; col++) {
+                let x, y;
+
+                // Layout logic
+                if (randomLayout === 'rectangle') {
+                    x = startX + col * (ENEMY_WIDTH + 10);
+                    y = startY + row * (ENEMY_WIDTH + 10);
+                } else if (randomLayout === 'triangle') {
+                    x = startX + (col - row) * (ENEMY_WIDTH + 10);
+                    y = startY + row * (ENEMY_WIDTH + 10);
+                } else if (randomLayout === 'line') {
+                    x = startX + col * (ENEMY_WIDTH + 10);
+                    y = startY + row * 10; // Line style, just a small vertical gap
+                }
+
+                const enemy = document.createElement("div");
+                enemy.classList.add("enemy");
+                enemy.style.width = `${ENEMY_WIDTH}px`;
+                enemy.style.height = `${ENEMY_WIDTH}px`;
+                enemy.style.position = "absolute";
+                enemy.style.left = `${x}px`;
+                enemy.style.top = `${y}px`;
+
+                gameContainer.appendChild(enemy);
+                enemies.push(enemy);
+            }
+        }
     }
 
     function updateGame() {
@@ -67,61 +96,45 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         enemies.forEach((enemy, index) => {
-            let enemyY = parseInt(enemy.element.style.top) + ENEMY_SPEED;
+            let enemyY = parseInt(enemy.style.top) + ENEMY_SPEED; // Slower enemy speed
             if (enemyY > GAME_HEIGHT) {
-                enemy.failCount++; // Increment fail count when enemy reaches the bottom
-                if (enemy.failCount >= 3) {
-                    gameOver = true;
-                    alert("Game Over! An enemy reached the bottom 3 times.");
-                    return;
-                }
-                enemy.element.remove();
-                enemies.splice(index, 1);
-                score -= 10;
-                scoreDisplay.innerText = score;
+                gameOver = true;
+                gameOverDisplay.innerText = "Yes";
+                alert("Game Over! Your score is: " + score);
             } else {
-                enemy.element.style.top = `${enemyY}px`;
+                enemy.style.top = `${enemyY}px`;
             }
         });
 
         bullets.forEach((bullet, bulletIndex) => {
             enemies.forEach((enemy, enemyIndex) => {
-                if (detectCollision(bullet, enemy.element)) {
+                if (detectCollision(bullet, enemy)) {
                     bullet.remove();
-                    enemy.element.remove();
+                    enemy.remove();
                     bullets.splice(bulletIndex, 1);
                     enemies.splice(enemyIndex, 1);
                     score += 10;
                     scoreDisplay.innerText = score;
+                    checkGameOver();
                 }
             });
         });
 
-        updatePurchaseButtons();
         requestAnimationFrame(updateGame);
     }
 
     function detectCollision(a, b) {
         let aRect = a.getBoundingClientRect();
         let bRect = b.getBoundingClientRect();
-        return !(
-            aRect.top > bRect.bottom ||
-            aRect.bottom < bRect.top ||
-            aRect.left > bRect.right ||
-            aRect.right < bRect.left
-        );
+        return !(aRect.top > bRect.bottom || aRect.bottom < bRect.top || aRect.left > bRect.right || aRect.right < bRect.left);
     }
 
-    function updatePurchaseButtons() {
-        buy20Button.style.display = score >= 100 ? "block" : "none";
-        buy50Button.style.display = score >= 200 ? "block" : "none";
-        buy150Button.style.display = score >= 500 ? "block" : "none";
-    }
-
-    function handleKeyboardInput(e) {
-        if (e.key === "ArrowLeft" || e.key === "a") movePlayer(-1);  // A key for left
-        if (e.key === "ArrowRight" || e.key === "d") movePlayer(1);   // D key for right
-        if (e.key === " ") shootBullet();  // Space key to shoot
+    function checkGameOver() {
+        if (enemies.length === 0) {
+            gameOver = true;
+            gameOverDisplay.innerText = "Yes";
+            alert("You Win! Final Score: " + score);
+        }
     }
 
     function updateGamepadControls() {
@@ -130,7 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const gamepads = navigator.getGamepads();
         if (gamepadIndex !== null && gamepads[gamepadIndex]) {
             const gp = gamepads[gamepadIndex];
-
             let xMove = Math.abs(gp.axes[0]) > 0.2 ? Math.sign(gp.axes[0]) : 0;
             movePlayer(xMove);
 
@@ -140,35 +152,31 @@ document.addEventListener("DOMContentLoaded", () => {
         requestAnimationFrame(updateGamepadControls);
     }
 
-    function buyBullets(amount) {
-        if (amount === 20 && score >= 100) {
-            totalBullets += 20;
-            score -= 100;
-        } else if (amount === 50 && score >= 200) {
-            totalBullets += 50;
-            score -= 200;
-        } else if (amount === 150 && score >= 500) {
-            totalBullets += 150;
-            score -= 500;
-        }
-        scoreDisplay.innerText = score;
-        updatePurchaseButtons();
+    function handleKeyboardInput(e) {
+        if (e.key === "ArrowLeft" || e.key === "a") movePlayer(-1);
+        if (e.key === "ArrowRight" || e.key === "d") movePlayer(1);
+        if (e.key === " ") shootBullet();
     }
 
-    let canShoot = true;
+    function playRandomAudio() {
+        const audioFiles = [
+            "audio/pew-pew-lame-sound-effect.mp3",
+            "audio/explosion-sound-effect.mp3"
+        ];
+
+        const randomIndex = Math.floor(Math.random() * audioFiles.length);
+        const audio = new Audio(audioFiles[randomIndex]);
+        audio.play();
+    }
 
     window.addEventListener("keydown", handleKeyboardInput);
-
     window.addEventListener("gamepadconnected", (event) => {
         gamepadIndex = event.gamepad.index;
         console.log("Gamepad connected");
     });
 
-    buy20Button.addEventListener("click", () => buyBullets(20));
-    buy50Button.addEventListener("click", () => buyBullets(50));
-    buy150Button.addEventListener("click", () => buyBullets(150));
-
-    setInterval(spawnEnemy, 2000);
+    spawnEnemies();
+    setInterval(() => spawnEnemies(), 7000); // Slower enemy respawn rate
     updateGame();
     updateGamepadControls();
 });
