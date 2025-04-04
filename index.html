@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P", href="https://fonts.googleapis.com/css?family=Poppins:wght@300;400;600&display=swap">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +14,13 @@
         <div id="player" class="player"></div>
     </div>
     <p>Score: <span id="score">0</span></p>
+    <button id="toggleChartButton">Show Score Chart</button>
+    <div id="chartPopup" class="popup">
+        <canvas id="scoreChart"></canvas>
+        <button id="closeChartButton">Close</button>
+    </div>
     <p>Game Over: <span id="gameOver">No</span></p>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

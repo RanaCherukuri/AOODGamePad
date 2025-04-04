@@ -22,6 +22,99 @@ document.addEventListener("DOMContentLoaded", () => {
     let spawnInterval = 3000;  // Initial spawn interval in ms (3 seconds)
     let spawnDelayIncrement = 10000;  // Add 2 seconds to spawn delay after each batch
 
+    let scoreHistory = [];
+    let timeLabels = [];
+
+    // Retrieve past scores from localStorage
+    let storedScores = JSON.parse(localStorage.getItem("scoreHistory")) || [];
+
+    // Initialize Chart.js
+    const ctx = document.getElementById('scoreChart').getContext('2d');
+    const scoreChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timeLabels,  // Use timeLabels from localStorage
+            datasets: [{
+                label: 'Total Score Over Games',
+                data: scoreHistory, // Use scoreHistory from localStorage
+                borderColor: 'red',
+                borderWidth: 2,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { 
+                    title: { display: true, text: 'Game Iteration' },
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 0
+                    }
+                },
+                y: { 
+                    title: { display: true, text: 'Final Score' },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    document.getElementById("toggleChartButton").addEventListener("click", () => {
+        document.getElementById("chartPopup").style.display = "block";
+    });
+
+    document.getElementById("closeChartButton").addEventListener("click", () => {
+        document.getElementById("chartPopup").style.display = "none";
+    });
+
+    function updateScore(newScore) {
+        let currentTime = (performance.now() / 1000).toFixed(1); // Time in seconds
+        
+        // Add new score and time to the histories
+        scoreHistory.push(newScore);
+        timeLabels.push(currentTime);
+    
+        // Optionally limit to the last 20 scores
+        if (scoreHistory.length > 20) {
+            scoreHistory.shift();
+            timeLabels.shift();
+        }
+    
+        // Update chart data dynamically
+        scoreChart.data.labels = timeLabels;
+        scoreChart.data.datasets[0].data = scoreHistory;
+    
+        // Update the chart immediately
+        scoreChart.update();
+    }
+    
+    function updateChart() {
+        let storedScores = JSON.parse(localStorage.getItem("scoreHistory")) || [];
+        let storedNames = JSON.parse(localStorage.getItem("nameHistory")) || [];
+    
+        scoreChart.data.labels = storedNames; // Use names instead of "Game 1, 2..."
+        scoreChart.data.datasets[0].data = storedScores;
+        scoreChart.update();
+    }
+    
+    function saveScore(finalScore) {
+        let storedScores = JSON.parse(localStorage.getItem("scoreHistory")) || [];
+        let storedTimes = JSON.parse(localStorage.getItem("timeLabels")) || [];
+
+        storedScores.push(finalScore);
+        storedTimes.push((performance.now() / 1000).toFixed(1));
+
+        // Optionally limit to the last 20 scores
+        if (storedScores.length > 20) {
+            storedScores.shift();
+            storedTimes.shift();
+        }
+
+        localStorage.setItem("scoreHistory", JSON.stringify(storedScores));
+        localStorage.setItem("timeLabels", JSON.stringify(storedTimes));
+    }
+    
     // Adjust player movement speed (slower horizontal movement)
     function movePlayer(direction) {
         playerX += direction * 15;  // Reduced movement per step
@@ -85,8 +178,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateGame() {
-        if (gameOver) return;
-
+        if (gameOver) return;  // Prevent further updates if the game is over
+    
+        // Update bullets' position
         bullets.forEach((bullet, index) => {
             let bulletY = parseInt(bullet.style.bottom) + BULLET_SPEED;
             if (bulletY > GAME_HEIGHT) {
@@ -96,19 +190,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 bullet.style.bottom = `${bulletY}px`;
             }
         });
-
+    
+        // Update enemies' position
         enemies.forEach((enemy, index) => {
-            let enemyY = parseInt(enemy.style.top) + ENEMY_SPEED; // Slower enemy speed
+            let enemyY = parseInt(enemy.style.top) + ENEMY_SPEED;
             if (enemyY > GAME_HEIGHT) {
-                gameOver = true;
-                gameOverDisplay.innerText = `Game Over! Final Score: ${score}\nPress "R" to Restart`;
-                playRandomAudio();  // Play random audio when game ends
-                alert("Game Over! Your score is: " + score);
+                // Check if the game is over and only trigger once
+                if (!gameOver) {
+                    gameOver = true;
+                    gameOverDisplay.innerText = `Game Over! Final Score: ${score}\nPress "R" to Restart`;
+                    saveScore(score); // Save the final score
+                    alert("Game Over! Your score is: " + score);
+                }
             } else {
                 enemy.style.top = `${enemyY}px`;
             }
         });
-
+    
+        // Check for collisions and update score immediately
         bullets.forEach((bullet, bulletIndex) => {
             enemies.forEach((enemy, enemyIndex) => {
                 if (detectCollision(bullet, enemy)) {
@@ -116,16 +215,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     enemy.remove();
                     bullets.splice(bulletIndex, 1);
                     enemies.splice(enemyIndex, 1);
+    
+                    // Update score immediately
                     score += 10;
-                    scoreDisplay.innerText = score;
-                    checkGameOver();
+                    scoreDisplay.innerText = score;  // Immediate UI update
+                    updateScore(score);  // Update the chart immediately
+    
+                    checkGameOver(); // Check if all enemies are destroyed
                 }
             });
         });
-
+    
         requestAnimationFrame(updateGame);
     }
-
+    
     function detectCollision(a, b) {
         let aRect = a.getBoundingClientRect();
         let bRect = b.getBoundingClientRect();
@@ -136,6 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (enemies.length === 0) {
             gameOver = true;
             gameOverDisplay.innerText = `You Win! Final Score: ${score}\nPress "R" to Restart`;
+            saveScore(score);  // Save the final score
             playRandomAudio();  // Play random audio when the player wins
             alert("You Win! Final Score: " + score);
         }
@@ -196,6 +300,8 @@ document.addEventListener("DOMContentLoaded", () => {
         score = 0;
         scoreDisplay.innerText = score;
         gameOverDisplay.innerText = "";
+        scoreHistory = []; // Reset score history
+        timeLabels = []; // Reset time labels
 
         // Clear enemies and bullets
         enemies.forEach(enemy => enemy.remove());
@@ -230,3 +336,5 @@ document.addEventListener("DOMContentLoaded", () => {
     updateGame();
     updateGamepadControls();
 });
+
+updateChart();
