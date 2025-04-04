@@ -1,26 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P", href="https://fonts.googleapis.com/css?family=Poppins:wght@300;400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Press+Start+2P">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galaga Game</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galaga Game</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Galaga Game</h1>
-    <p>Use GamePad, Keyboard (← →, A D), or Mouse to control the player. Shoot the enemies!</p>
-    <div id="gameContainer">
-        <div id="player" class="player"></div>
-    </div>
-    <p>Score: <span id="score">0</span></p>
-    <button id="toggleChartButton">Show Score Chart</button>
-    <div id="chartPopup" class="popup">
-        <canvas id="scoreChart"></canvas>
-        <button id="closeChartButton">Close</button>
-    </div>
-    <p>Game Over: <span id="gameOver">No</span></p>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js"></script>
+  <h1>Galaga Game</h1>
+  <p>Use GamePad, Keyboard (← →, A D), or Mouse to control the player. Shoot the enemies!</p>
+  <div id="gameContainer">
+    <div id="player" class="player"></div>
+  </div>
+  <p>Score: <span id="score">0</span></p>
+  <button id="toggleChartButton">Show Score Chart</button>
+  <div id="chartPopup" class="popup" style="display:none;">
+    <canvas id="scoreChart" width="400" height="300"></canvas>
+    <button id="closeChartButton">Close</button>
+  </div>
+  <p>Game Over: <span id="gameOver">No</span></p>
+
+  <!-- Chart.js and script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
