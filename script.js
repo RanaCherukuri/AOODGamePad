@@ -236,6 +236,33 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === "r" || e.key === "R") restartGame();
     });
 
+    // Gamepad support
+    function handleGamepadInput() {
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+
+        if (!gamepads[0]) {
+            requestAnimationFrame(handleGamepadInput);
+            return;
+        }
+
+        const gp = gamepads[0];
+
+        const threshold = 0.2;
+        if (gp.axes[0] < -threshold) movePlayer(-1);
+        else if (gp.axes[0] > threshold) movePlayer(1);
+
+        if (gp.buttons[0].pressed) shootBullet();
+
+        if ((gp.buttons[1].pressed || gp.buttons[9].pressed) && gameOver) restartGame();
+
+        requestAnimationFrame(handleGamepadInput);
+    }
+
+    window.addEventListener("gamepadconnected", () => {
+        console.log("Gamepad connected!");
+        requestAnimationFrame(handleGamepadInput);
+    });
+
     spawnEnemies();
     updateGame();
 });
