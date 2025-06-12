@@ -9,21 +9,59 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Galaga Game</h1>
-  <p>Use GamePad, Keyboard (← →, A D), or Mouse to control the player. Shoot the enemies!</p>
+    <div id="menuBar">
+    <button id="directionsButton">Directions</button>
+    <button onclick="setDifficulty('easy')">Easy Mode</button>
+    <button onclick="setDifficulty('hard')">Hard Mode</button>
+    <button onclick="setDifficulty('impossible')">Impossible Mode</button>
+    <label for="assetStyle">🎨 Style:</label>
+    <select id="assetStyle">
+      <option value="default">Default</option>
+      <option value="gif">GIF Style</option>
+    </select>
+  </div>
+
+  <div id="directionsPopup" class="popup" style="display:none;">
+    <p>Galaga Game: Retro Arcade Meets Modern Vibes
+      <br>Step into a neon-lit throwback with Galaga Game, a modern reimagining of the classic arcade space shooter. Featuring responsive controls, animated enemies, and a looping soundtrack with selectable background music, this project blends nostalgic visuals with fresh gameplay mechanics.
+      <br>Gameplay Highlights
+      <br>	•	Control your ship using keyboard or gamepad
+      <br>	•	Blast waves of enemies before they reach the bottom
+      <br>	•	Choose from multiple difficulty modes
+      <br>	•	Track your high scores on an interactive chart
+      <br>	•	Copy a screenshot of your victory with one click
+      <br>Features
+      <br>	•	Background music selector with looping audio
+      <br>	•	Stylized retro font and rainbow text animations
+      <br>	•	Score tracking and local leaderboard (top 7 players)
+      <br>	•	Fully responsive and playable in-browser
+    </p>
+    <button onclick="document.getElementById('directionsPopup').style.display='none'">Close</button>
+  </div>
+  <h1 class="rainbow-text">Galaga Game</h1>
   <div id="gameContainer">
     <div id="player" class="player"></div>
   </div>
-  <p>Score: <span id="score">0</span></p>
+  <p class="rainbow-text">Score: <span id="score">0</span></p>
   <button id="toggleChartButton">Show Score Chart</button>
+  <button id="screenshotButton">Copy Screenshot</button>
   <div id="chartPopup" class="popup" style="display:none;">
     <canvas id="scoreChart" width="400" height="300"></canvas>
     <button id="closeChartButton">Close</button>
   </div>
-  <p>Game Over: <span id="gameOver">No</span></p>
+  <p><span id="gameOver">Let's Play Galaga!</span></p>
 
+  <div id="musicControls">
+    <label for="musicSelect">🎵 Choose Music:</label>
+    <select id="musicSelect">
+      <option value="assets/audios/survive.mp3">Survive (Daredevil: Born Again) - The Newton Brothers</option>
+      <option value="assets/audios/redline.mp3">Redline (Asphalt 8: Airborne) - DJ Gontran</option>
+      <option value="song3.mp3">Song 3</option>
+    </select>
+  </div>
+</body>
   <!-- Chart.js and script -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="script.js"></script>
-</body>
 </html>

@@ -1,3 +1,69 @@
+
+#musicControls {
+    margin-top: 20px;
+    font-family: 'Press Start 2P', sans-serif;
+}
+
+#musicControls label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+#musicSelect {
+    padding: 5px;
+    border-radius: 5px;
+    font-family: 'Press Start 2P', sans-serif;
+}
+
+#toggleChartButton {
+    margin: 10px 5px;
+    padding: 10px 15px;
+    background-color: #8ecae6;
+    color: black;
+    border: 2px solid white;
+    border-radius: 5px;
+    font-family: 'Press Start 2P', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#toggleChartButton:hover {
+    background-color: #219ebc;
+}
+#screenshotButton {
+    margin: 10px 5px;
+    padding: 10px 15px;
+    background-color: #8ecae6;
+    color: black;
+    border: 2px solid white;
+    border-radius: 5px;
+    font-family: 'Press Start 2P', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#screenshotButton:hover {
+    background-color: #219ebc;
+}
+#menuBar {
+    margin: 10px 0;
+}
+
+#menuBar button {
+    margin: 0 5px;
+    padding: 10px 15px;
+    background-color: #6aafd0;
+    color: rgb(0, 0, 0);
+    border: 2px solid white;
+    border-radius: 5px;
+    font-family: 'Press Start 2P', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#menuBar button:hover {
+    background-color: #555;
+}
 body {
     text-align: center;
     background-color: black;
@@ -8,12 +74,19 @@ body {
 
 #gameContainer {
     position: relative;
-    width: 400px;
-    height: 600px;
-    background-image: url("nightsky.jpg");
+    width: 90vw;
+    max-width: 400px;
+    height: 135vw;
+    max-height: 500px;
+    background-image: url("assets/nightsky.jpg");
     border: 2px solid rgb(255, 255, 255);
     margin: auto;
     overflow: hidden;
+}
+
+#scoreChart {
+    width: 100% !important;
+    height: auto !important;
 }
 
 .player {
@@ -35,6 +108,12 @@ body {
     box-shadow: 0px 0px 5px lime;
 }
 
+/* Remove box-shadow for .player and .enemy in GIF mode */
+.gif-style .player,
+.gif-style .enemy {
+    box-shadow: none !important;
+}
+
 .bullet {
     position: absolute;
     width: 5px;
@@ -52,14 +131,67 @@ h1, p {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(29, 18, 61, 0.9);
-    border-color: aliceblue;
-    border-width: 5px;
-    border-style: solid;
+    background: rgba(29, 18, 61, 0.95);
+    border: 2px solid #00ffff;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     text-align: center;
     z-index: 1000;
-    width: 800px;
-    height: 400px;
+    width: 90vw;
+    max-width: 500px;
+    height: auto;
+    max-height: 80vh;
+    overflow: auto;
+    box-shadow: 0 0 20px cyan;
+}
+
+
+
+
+.difficulty-popup {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Press Start 2P', sans-serif;
+    font-size: 16px;
+    z-index: 1001;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+@keyframes textGradient {
+    0% { color: white; }
+    16% { color: cyan; }
+    32% { color: white; }
+    48% { color: lime; }
+    64% { color: white; }
+    80% { color: #219ebc; }
+    100% { color: cyan; }
+}
+
+.rainbow-text {
+    animation: textGradient 30s infinite;
+}
+#assetStyle {
+    padding: 10px 15px;
+    margin: 0 5px;
+    background-color: #6aafd0;
+    color: black;
+    border: 2px solid white;
+    border-radius: 5px;
+    font-family: 'Press Start 2P', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+}
+#assetStyle:hover {
+    background-color: #555;
+}
+.popup p {
+    text-align: left;
+    font-family: 'Poppins', sans-serif;
 }
