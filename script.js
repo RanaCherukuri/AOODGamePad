@@ -40,13 +40,14 @@ document.addEventListener("DOMContentLoaded", () => {
 	const audioPlayer = new Audio();
 	audioPlayer.src = "assets/audios/survive.mp3";
 	audioPlayer.loop = true;
-	audioPlayer.volume = 0.5;
+	audioPlayer.volume = 0.05;
 	audioPlayer.play();
 
 	const musicSelect = document.getElementById("musicSelect");
 	musicSelect.addEventListener("change", () => {
 		const selectedSong = musicSelect.value;
 		audioPlayer.src = selectedSong;
+		audioPlayer.volume = 0.05;
 		audioPlayer.play();
 	});
 	const screenshotButton = document.getElementById("screenshotButton");
